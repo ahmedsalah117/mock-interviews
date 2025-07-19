@@ -38,7 +38,7 @@ interface User {
   id: string;
 }
 
-interface InterviewCardProps {
+export interface InterviewCardProps {
   interviewId?: string;
   userId?: string;
   role: string;
