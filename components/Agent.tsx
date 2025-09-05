@@ -1,5 +1,6 @@
 "use client";
 import { interviewer } from "@/constants";
+import { createFeedback } from "@/lib/actions/general.action";
 import { cn } from "@/lib/utils";
 import { vapi } from "@/lib/vapi.sdk";
 import { AgentProps } from "@/types";
@@ -67,12 +68,12 @@ const Agent = ({
   }, []);
 
   async function handleGenerateFeedback(messages: SavedMessage[]) {
-    // todo: create a server action to generate feedback
-    const { success, id } = {
-      success: true,
-      id: "feedback-id",
-    };
-    if (success && id) {
+    const { success, feedbackId } = await createFeedback({
+      interviewId: interviewId || "",
+      userId: userId || "",
+      transcript: messages,
+    });
+    if (success && feedbackId) {
       router.push(`/interview/${interviewId}/feedback`);
     } else {
       console.log("Failed to generate feedback.");
@@ -116,8 +117,8 @@ const Agent = ({
 
       await vapi.start(interviewer, {
         variableValues: {
-          questions:formattedQuestions,
-        }
+          questions: formattedQuestions,
+        },
       });
     }
   };

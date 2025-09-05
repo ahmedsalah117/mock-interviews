@@ -18,6 +18,7 @@ const HomePage = async () => {
   ]);
   const hasPastInterviews = (userInterviews?.length || 0) > 0;
   const hasUpcomingInterviews = (latestInterviews?.length || 0) > 0;
+  console.log("this code runs on the server on the home page.");
   return (
     <>
       <section className="card-cta">
