@@ -7,6 +7,7 @@ import { AgentProps } from "@/types";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 enum CALLSTATUS {
   INACTIVE = "INACTIVE",
@@ -34,7 +35,10 @@ const Agent = ({
 
   useEffect(() => {
     const onCallStart = () => setCallStatus(CALLSTATUS.ACTIVE);
-    const onCallEnd = () => setCallStatus(CALLSTATUS.FINISHED);
+    const onCallEnd = () => {
+      vapi.stop();
+      setCallStatus(CALLSTATUS.FINISHED);
+    };
     const onMessage = (message: Message) => {
       if (message.type === "transcript" && message.transcriptType === "final") {
         const newMessage = { role: message?.role, content: message.transcript };
@@ -47,7 +51,8 @@ const Agent = ({
     const onSpeechEnd = () => setIsSpeaking(false);
 
     const onError = (error: Error) => {
-      console.log("Error:", error);
+      // how to catch the thrown error from vapi sdk and handle it here
+      console.log("the error details:", error);
     };
 
     vapi.on("call-start", onCallStart);
@@ -91,21 +96,52 @@ const Agent = ({
     }
   }, [messages, callStatus, type, userId]);
 
+  // handles a case where the user denies the microphone access while starting the call.
+  useEffect(() => {
+    const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
+      // Handle specific error types
+      if (event?.reason instanceof Error) {
+        if (event?.reason?.name === "NotAllowedError") {
+          toast.error(
+            "Microphone access denied. Please allow microphone permissions to use voice features."
+          );
+          // Reset call status or handle gracefully
+          setCallStatus(CALLSTATUS.FINISHED);
+        }
+      }
+
+      // Prevent the default browser error handling
+      event.preventDefault();
+    };
+    window.addEventListener("unhandledrejection", handleUnhandledRejection);
+
+    return () => {
+      window.removeEventListener(
+        "unhandledrejection",
+        handleUnhandledRejection
+      );
+    };
+  }, []);
+
   const handleCall = async () => {
     setCallStatus(CALLSTATUS.CONNECTING);
     if (type === "generate") {
-      await vapi.start(
-        undefined,
-        undefined,
-        undefined,
-        process.env.NEXT_PUBLIC_VAPI_WORKFLOW_ID,
-        {
-          variableValues: {
-            username: userName,
-            userid: userId,
-          },
-        }
-      );
+      try {
+        await vapi.start(
+          undefined,
+          undefined,
+          undefined,
+          process.env.NEXT_PUBLIC_VAPI_WORKFLOW_ID,
+          {
+            variableValues: {
+              username: userName,
+              userid: userId,
+            },
+          }
+        );
+      } catch (error) {
+        console.log("the vapi error is ", error);
+      }
     } else {
       let formattedQuestions = ``;
 
