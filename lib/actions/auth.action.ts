@@ -141,3 +141,16 @@ export async function isAuthenticated() {
   const user = await getCurrentUser();
   return !!user;
 }
+
+
+export async function signOutHandler() {
+  const cookieStore = await cookies();
+  // Clear the session cookie by setting it to expire immediately
+  cookieStore.set("session", "", {
+    maxAge: 0,
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+  });
+
+  cookieStore.delete("session");
+}
