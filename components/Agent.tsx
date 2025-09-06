@@ -227,7 +227,9 @@ const Agent = ({
               )}
             />
 
-            <span>{isCallInActiveOrFinished ? "Call" : ". . ."}</span>
+            <span className="animate-pulse">
+              {isCallInActiveOrFinished ? "Call" : "Starting..."}
+            </span>
           </button>
         ) : (
           <button className="btn-disconnect" onClick={handleDisconnect}>
