@@ -1,7 +1,7 @@
 "use client";
 import { interviewer } from "@/constants";
 import { createFeedback } from "@/lib/actions/general.action";
-import { cn } from "@/lib/utils";
+import { cn, getInitials } from "@/lib/utils";
 import { vapi } from "@/lib/vapi.sdk";
 import { AgentProps } from "@/types";
 import Image from "next/image";
@@ -187,13 +187,14 @@ const Agent = ({
 
         <div className={"card-border"}>
           <div className="card-content">
-            <Image
-              src={"/user-avatar.png"}
-              alt="user avatar"
-              width={540}
-              height={540}
-              className="object-cover rounded-full size-[120px]"
-            />
+            <div
+              className={cn(
+                "bg-accent w-32 h-32 text-2xl font-bold rounded-full p-3 flex items-center justify-center"
+              )}
+            >
+              <p>{getInitials(userName)}</p>
+            </div>
+
             <h3>{userName}</h3>
           </div>
         </div>
